@@ -89,7 +89,7 @@ async def AI(message: str):
         )
     data = response.json()
     ascii_art = data["choices"][0]["message"]["content"]
-
+    return data
     return Response(content=ascii_art, media_type="text/plain")
 
 @app.get("/colored/")
