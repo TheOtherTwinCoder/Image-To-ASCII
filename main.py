@@ -182,3 +182,44 @@ async def post_feedback(feedback: Feedback):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/feedback")
+async def get_feedback():
+    cursor.execute("""
+        SELECT id, message, created_at
+        FROM feedback
+        ORDER BY created_at DESC
+    """)
+
+    rows = cursor.fetchall()
+
+    return [
+        {
+            "id": row[0],
+            "message": row[1],
+            "created_at": row[2]
+        }
+        for row in rows
+    ]
+
+@app.get("/feedback/{feedback_id}")
+async def get_feedback_by_id(feedback_id: int):
+    cursor.execute("""
+        SELECT id, message, created_at
+        FROM feedback
+        WHERE id = ?
+    """, (feedback_id,))
+
+    row = cursor.fetchone()
+
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Feedback not found"
+        )
+
+    return {
+        "id": row[0],
+        "message": row[1],
+        "created_at": row[2]
+    }
