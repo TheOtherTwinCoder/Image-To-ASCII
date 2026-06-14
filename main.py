@@ -5,9 +5,10 @@ from fastapi import FastAPI
 import requests
 import json
 from fastapi import Response
+import os
 
 
-
+secret = os.getenv('API_KEY')
 app = FastAPI()
 @app.get("/bnw/")
 async def blackandwhite(url: str, invertbrightness: bool, plaintext: bool, complex: bool):
