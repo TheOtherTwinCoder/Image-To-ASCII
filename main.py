@@ -6,10 +6,15 @@ import requests
 import json
 from fastapi import Response
 import os
+import sqlite3
+from fastapi import HTTPException
+from pydantic import BaseModel
 
 
 secret = os.getenv('API_KEY')
 app = FastAPI()
+conn = sqlite3.connect("feedback.db", check_same_thread=False)
+cursor = conn.cursor()
 @app.get("/bnw/")
 async def blackandwhite(url: str, invertbrightness: bool, plaintext: bool, complex: bool):
     option = invertbrightness
@@ -147,3 +152,33 @@ async def colored(url: str, invertbrightness: bool, invertcolor: bool, complex: 
 @app.get("/health/")
 async def health():
     return {"health": "ok"}
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+conn.commit()
+
+
+class Feedback(BaseModel):
+    message: str
+
+@app.post("/post")
+async def post_feedback(feedback: Feedback):
+    try:
+        cursor.execute(
+            "INSERT INTO feedback (message) VALUES (?)",
+            (feedback.message,)
+        )
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Feedback stored successfully"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
