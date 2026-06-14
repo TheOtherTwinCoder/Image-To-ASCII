@@ -7,11 +7,8 @@ import json
 from fastapi import Response
 
 
-""""<span style='color: rgb(255, 165, 0);'>This is line 1 text</span><br>\n"
-    "<span style='color: rgb(255, 165, 0);'>This is line 2 text</span>"""""
 
 app = FastAPI()
-secret = "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"
 @app.get("/bnw/")
 async def blackandwhite(url: str, invertbrightness: bool, plaintext: bool, complex: bool):
     option = invertbrightness
